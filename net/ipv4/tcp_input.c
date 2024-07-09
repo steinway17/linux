@@ -478,14 +478,25 @@ static int __tcp_grow_window(const struct sock *sk, const struct sk_buff *skb,
 	/* Optimize this! */
 	int truesize = tcp_win_from_space(sk, skbtruesize) >> 1;
 	int window = tcp_win_from_space(sk, READ_ONCE(sock_net(sk)->ipv4.sysctl_tcp_rmem[2])) >> 1;
+	// 여기서 window는 결국 tcp_rmem[2] 이므로 상수임
+	// 즉, 설정상의 window size의 최대치를 나타낸다고 보이며, 이걸 계속 2로 나누게 됨.
 
 	while (tp->rcv_ssthresh <= window) {
+		// pje:
+		// rcv_ssthresh가 window 보다 작은 동안,
+		// window를 계속 반으로 나누면서,
+		// truesize 도 계속 반으로 나누는데, skb->len 보다 작아지는 경우가 있으면!
+
 		if (truesize <= skb->len)
+			// rcv_mss의 두 배를 리턴
 			return 2 * inet_csk(sk)->icsk_ack.rcv_mss;
 
 		truesize >>= 1;
 		window >>= 1;
 	}
+
+	// 결국 (2 * inet_csk(sk)->icsk_ack.rcv_mss) 나 0 을 반환하게 되어 있는데,
+
 	return 0;
 }
 
@@ -523,6 +534,9 @@ static void tcp_grow_window(struct sock *sk, const struct sk_buff *skb,
 	if (!tcp_under_memory_pressure(sk)) {
 		unsigned int truesize = truesize_adjust(adjust, skb);
 		int incr;
+
+		// pje:
+		//
 
 		/* Check #2. Increase window, if skb with such overhead
 		 * will fit to rcvbuf in future.
