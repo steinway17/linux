@@ -57,25 +57,15 @@
 	SF(OTG0_OTG_VUPDATE_KEEPOUT, MASTER_UPDATE_LOCK_VUPDATE_KEEPOUT_END_OFFSET, mask_sh), \
 	SF(OTG0_OTG_GSL_CONTROL, OTG_GSL_MASTER_MODE, mask_sh), \
 	SF(OTG0_OTG_GSL_CONTROL, OTG_MASTER_UPDATE_LOCK_GSL_EN, mask_sh), \
-	SF(OTG0_OTG_DSC_START_POSITION, OTG, inst),\DE_BY_SIDE &&
-		timing->timing_3d_format != TIMING_3D_FORMAT_FRAME_ALTERNATE &&
-		timing->timing_3d_format != TIMING_3D_FORMAT_INBAND_FA)
-		return false;
+	SF(OTG0_OTG_DSC_START_POSITION, OTG_DSC_START_POSITION_X, mask_sh), \
+	SF(OTG0_OTG_DSC_START_POSITION, OTG_DSC_START_POSITION_LINE_NUM, mask_sh),\
+	SF(ODM0_OPTC_DATA_SOURCE_SELECT, OPTC_SEG0_SRC_SEL, mask_sh),\
+	SF(ODM0_OPTC_DATA_FORMAT_CONTROL, OPTC_DSC_MODE, mask_sh),\
+	SF(ODM0_OPTC_BYTES_PER_PIXEL, OPTC_DSC_BYTES_PER_PIXEL, mask_sh),\
+	SF(ODM0_OPTC_WIDTH_CONTROL, OPTC_DSC_SLICE_WIDTH, mask_sh),\
+	SF(DWB_SOURCE_SELECT, OPTC_DWB0_SOURCE_SELECT, mask_sh),\
+	SF(DWB_SOURCE_SELECT, OPTC_DWB1_SOURCE_SELECT, mask_sh),\
+	SF(DWB_SOURCE_SELECT, OPTC_DWB1_SOURCE_SELECT, mask_sh)
 
-	/* Check maximum number of pixels supported by Timing Generator
-	 * (Currently will never fail, in order to fail needs display which
-	 * needs more than 8192 horizontal and
-	 * more than 8192 vertical total pixels)
-	 */
-	if (timing->h_total > optc1->max_h_total ||
-		timing->v_total > optc1->max_v_total)
-		return false;
-
-	if (h_blank < optc1->min_h_blank)
-		return false;
-
-	if (timing->h_sync_width  < optc1->min_h_sync_width ||
-		 timing->v_sync_width  < optc1->min_v_sync_width)
-		return false;
-
-	min_v_blank = timing-
+void dcn201_timing_generator_init(struct optc *optc);
+#endif
